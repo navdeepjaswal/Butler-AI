@@ -20,7 +20,7 @@ export default function Home() {
             just simple conversations.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <CTAButton text="Try Butler Now" href="/try-butler" />
+            <CTAButton text="Try Butler Now" href="/auth/sign-up" />
             <Link
               href="/how-it-works"
               className="inline-flex items-center text-lg text-gray-800 hover:text-gray-600 font-medium px-4 py-2"
@@ -182,7 +182,7 @@ export default function Home() {
           <p className="text-xl text-gray-700 mb-10">
             Join thousands of seniors who are confidently using technology with Butler's help.
           </p>
-          <CTAButton text="Try Butler For Free" href="/try-butler" />
+          <CTAButton text="Try Butler For Free" href="/auth/sign-up" />
         </div>
       </section>
 

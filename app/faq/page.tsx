@@ -143,7 +143,7 @@ export default function FAQ() {
           <p className="text-xl text-gray-700 mb-10">
             Join thousands of seniors who are confidently using technology with Butler's help.
           </p>
-          <CTAButton text="Try Butler For Free" href="/try-butler" />
+          <CTAButton text="Try Butler For Free" href="/auth/sign-up" />
         </div>
       </section>
 

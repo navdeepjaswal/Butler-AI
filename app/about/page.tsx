@@ -153,7 +153,7 @@ export default function About() {
           <p className="text-xl text-gray-700 mb-10">
             Experience how Butler AI can help you navigate technology with confidence.
           </p>
-          <CTAButton text="Try Butler Today" href="/try-butler" />
+          <CTAButton text="Try Butler Today" href="/auth/sign-up" />
         </div>
       </section>
 

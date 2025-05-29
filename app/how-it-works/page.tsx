@@ -228,7 +228,7 @@ export default function HowItWorks() {
           <p className="text-xl text-gray-700 mb-10">
             Start your journey with Butler today and discover how simple technology can be.
           </p>
-          <CTAButton text="Try Butler For Free" href="/try-butler" />
+          <CTAButton text="Try Butler For Free" href="/auth/sign-up" />
         </div>
       </section>
 

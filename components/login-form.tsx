@@ -36,7 +36,7 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      router.push("/try-butler");
+      router.push("/try-butler"); //add internal homepage
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

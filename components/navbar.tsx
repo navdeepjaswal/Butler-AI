@@ -31,7 +31,7 @@ export default function Navbar() {
         {/* Try Butler Button - Desktop */}
         <div className="hidden md:block">
           <Button asChild variant="default" size="lg" className="bg-purple-600 text-white hover:bg-purple-700 text-lg">
-            <Link href="/try-butler">Try Butler</Link>
+            <Link href="/auth/sign-up">Try Butler</Link>
           </Button>
         </div>
 
@@ -57,7 +57,7 @@ export default function Navbar() {
                 FAQ
               </Link>
               <Button asChild className="w-full bg-purple-600 hover:bg-purple-700 text-lg">
-                <Link href="/try-butler">Try Butler</Link>
+                <Link href="/auth/sign-up">Try Butler</Link>
               </Button>
             </nav>
           </SheetContent>
