@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Page() {
   return (
-    <div className="bg-gray-50 flex-grow">
+    <div className="bg-gray-50 h-full">
       {/* Navigation Bar is in RootLayout */}
 
       {/* Main Content */}

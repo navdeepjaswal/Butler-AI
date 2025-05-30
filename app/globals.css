@@ -65,4 +65,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  [data-radix-tooltip-content] svg {
+    display: none !important;
+  }
 }

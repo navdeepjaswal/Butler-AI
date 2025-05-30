@@ -34,7 +34,7 @@ export default function Navbar() {
 
   if (isLoading) {
     return (
-      <nav className="bg-gray-50 px-6 py-3 shadow-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-50/95 backdrop-blur-sm px-6 py-3 shadow-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Link href="/" className="flex items-center space-x-3">
             <Image src="/logo/Butler.png" alt="Butler Logo" width={50} height={50} />
@@ -47,7 +47,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-gray-50 px-6 py-3 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-50/95 backdrop-blur-sm px-6 py-3 shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between">
         <Link href={user && isDashboard ? "/dashboard" : "/"} className="flex items-center space-x-3">
           <Image src="/logo/Butler.png" alt="Butler Logo" width={50} height={50} />

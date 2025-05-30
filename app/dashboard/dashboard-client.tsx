@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Mic, Send, StopCircle } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Web Speech API types
 interface SpeechRecognitionEvent extends Event {
@@ -25,6 +32,7 @@ interface Message {
   id: string;
   text: string;
   sender: "user" | "butler";
+  isLoading?: boolean;
 }
 
 export function DashboardClient({ initialName }: DashboardClientProps) {
@@ -36,14 +44,18 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
   const [cueCards, setCueCards] = useState([
     "What's on the news?",
     "I want to search for an email",
-    "How do I video call my daughter?"
+    "How do I video call my daughter?",
   ]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [animateMic, setAnimateMic] = useState(true);
+  const [micPermissionChecked, setMicPermissionChecked] = useState(false);
+  const [micPermissionDenied, setMicPermissionDenied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Speech recognition setup
   const recognition = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Set greeting based on time of day
@@ -52,31 +64,40 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
     else if (hour < 18) setGreeting("Good afternoon");
     else setGreeting("Good evening");
 
+    // Always show first Butler message
+    setMessages([
+      {
+        id: "butler-welcome",
+        text: "Hello! Your Butler awaits — how can I serve your tech needs?",
+        sender: "butler",
+      },
+    ]);
+
     // Check platform support for speech recognition
-    const checkSpeechSupport = () => {
+    const checkSpeechSupport = async () => {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-      
-      if (isIOS) {
+      const isSafari = /^((?!chrome|android).)*safari/i.test(
+        navigator.userAgent,
+      );
+      const isFirefox =
+        navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
+
+      if (isIOS || isSafari || isFirefox || !("webkitSpeechRecognition" in window)) {
         setIsSpeechSupported(false);
-        setPlatformMessage("Voice input is not supported on iOS devices. iOS integration coming soon. Please use text input for now.");
-      } else if (isSafari) {
-        setIsSpeechSupported(false);
-        setPlatformMessage("Voice input is not supported in Safari. Please use Chrome or Edge browser, or continue with text input.");
-      } else if (isFirefox) {
-        setIsSpeechSupported(false);
-        setPlatformMessage("Voice input is not supported in Firefox. Please use Chrome or Edge browser, or continue with text input.");
-      } else if (!('webkitSpeechRecognition' in window)) {
-        setIsSpeechSupported(false);
-        setPlatformMessage("Voice input is not supported in your browser. Please use Chrome or Edge for voice features, or continue with text input.");
+        setPlatformMessage(
+          "Voice input is not supported in your browser. Please use Chrome or Edge for voice features, or continue with text input.",
+        );
+        setMicPermissionChecked(true);
+        return;
       }
+      setIsSpeechSupported(true);
+      setMicPermissionChecked(true);
     };
 
     checkSpeechSupport();
 
     // Initialize speech recognition if supported
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+    if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition;
       recognition.current = new SpeechRecognition();
       recognition.current.continuous = true;
@@ -84,18 +105,20 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
 
       recognition.current.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join('');
+          .map((result) => result[0])
+          .map((result) => result.transcript)
+          .join("");
         setInputText(transcript);
       };
 
       recognition.current.onerror = (event: SpeechRecognitionError) => {
-        console.error('Speech recognition error:', event.error);
+        console.error("Speech recognition error:", event.error);
         setIsListening(false);
-        if (event.error === 'not-allowed') {
+        if (event.error === "not-allowed") {
           setIsSpeechSupported(false);
-          setPlatformMessage("Microphone access was not enabled. Please enable microphone access so you can use speak to me.");
+          setPlatformMessage(
+            "Microphone access was not enabled. Please enable microphone access so you can use speak to me.",
+          );
         }
       };
 
@@ -117,7 +140,14 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
     }
   }, [inputText]);
 
-  const toggleListening = () => {
+  // Auto scroll to bottom when messages change
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const toggleListening = async () => {
     if (!isSpeechSupported) {
       alert(platformMessage);
       return;
@@ -128,45 +158,118 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
       return;
     }
 
-    if (isListening) {
-      recognition.current.stop();
-    } else {
-      recognition.current.start();
-      setInputText("");
+    try {
+      if (!isListening) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        setMicPermissionDenied(false);
+        recognition.current.start();
+        setInputText("");
+      } else {
+        recognition.current.stop();
+      }
+      setIsListening(!isListening);
+    } catch (error) {
+      setMicPermissionDenied(true);
+      setIsSpeechSupported(false);
+      setPlatformMessage("Enable mic permissions to use this feature.");
     }
-    setIsListening(!isListening);
   };
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
-    
-    const newMessage: Message = {
+  // Generate follow-up questions for cue cards
+  const generateFollowUpQuestions = async (userMessage: string, aiResponse: string) => {
+    try {
+      const res = await fetch("/api/openai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `Based on this conversation:\nUser: ${userMessage}\nButler: ${aiResponse}\n\nGenerate 3 natural follow-up questions that the user might want to ask next. Make them specific to the context of the conversation. Return ONLY the questions, separated by ||| (three pipes).`,
+          isFollowUp: true
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to generate follow-up questions');
+      
+      const data = await res.json();
+      const questions = data.response.split('|||').map((q: string) => q.trim());
+      setCueCards(questions);
+    } catch (error) {
+      console.error('Error generating follow-up questions:', error);
+      // Fallback to default cue cards
+      setCueCards([
+        "How do I stay safe online?",
+        "Can you explain cloud storage?",
+        "What's a good password strategy?",
+      ]);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!inputText.trim() || isLoading) return;
+
+    const userMessage: Message = {
       id: Date.now().toString(),
       text: inputText,
       sender: "user",
     };
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
 
-    // Simulate Butler response
-    setTimeout(() => {
-      const butlerResponse: Message = {
-        id: Date.now().toString() + "-butler",
-        text: `This is a sample response to: "${inputText}"`,
-        sender: "butler",
-      };
-      setMessages((prevMessages) => [...prevMessages, butlerResponse]);
-    }, 1000);
-    
-    // Update cue cards based on the input
-    if (inputText.toLowerCase().includes("weather")) {
-      setCueCards([
-        "What about tomorrow?",
-        "Should I carry an umbrella?",
-        "What's the temperature like?"
-      ]);
-    }
-    
+    // Add loading message for Butler
+    const loadingMessage: Message = {
+      id: Date.now().toString() + "-loading",
+      text: "...",
+      sender: "butler",
+      isLoading: true,
+    };
+
+    setMessages((prevMessages) => [...prevMessages, userMessage, loadingMessage]);
     setInputText("");
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/openai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: inputText }),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('OpenAI API Error:', {
+          status: res.status,
+          statusText: res.statusText,
+          error: data.error,
+          details: data.details
+        });
+        throw new Error(data.error || 'Failed to get response');
+      }
+
+      // Remove loading message and add actual response
+      setMessages((prevMessages) => {
+        const filteredMessages = prevMessages.filter(msg => !msg.isLoading);
+        return [...filteredMessages, {
+          id: Date.now().toString() + "-butler",
+          text: data.response,
+          sender: "butler",
+        }];
+      });
+
+      // Generate follow-up questions for cue cards
+      await generateFollowUpQuestions(inputText, data.response);
+
+    } catch (error: any) {
+      console.error('Client-side error:', error);
+      setMessages((prevMessages) => {
+        const filteredMessages = prevMessages.filter(msg => !msg.isLoading);
+        return [...filteredMessages, {
+          id: Date.now().toString() + "-error",
+          text: error.message || "I apologize, but I'm having trouble responding right now. Please try again.",
+          sender: "butler",
+        }];
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCueCardClick = (text: string) => {
@@ -175,17 +278,26 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
 
   return (
     <TooltipProvider>
-      <div className="max-w-4xl mx-auto space-y-12 pt-8 pb-16">
-        {/* Welcome Header */}
-        <header className="space-y-2">
+      <div className="mx-auto max-w-4xl h-[100vh] pt-16 px-4 flex flex-col">
+        {/* Welcome Header - reduced margins */}
+        <header className="space-y-1 flex-none mb-4">
           <h1 className="text-4xl font-bold text-gray-800">
-            {greeting}, {initialName} 
+            {greeting}, {initialName}
           </h1>
           <p className="text-2xl text-gray-600">What can I help with today?</p>
         </header>
 
-        {/* Chat Messages Display */}
-        <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-4">
+        {/* Chat Messages Display - with ref for auto-scroll */}
+        <div 
+          ref={chatContainerRef}
+          className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-4
+          scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
+          hover:scrollbar-thumb-gray-400 transition-colors"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#D1D5DB transparent',
+          }}
+        >
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -194,119 +306,163 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
               }`}
             >
               <Card
-                className={`p-3 max-w-[70%] break-words ${
+                className={`max-w-[70%] break-words p-3 ${
                   msg.sender === "user"
-                    ? "bg-blue-500 text-white rounded-br-none"
-                    : "bg-gray-200 text-gray-800 rounded-bl-none"
+                    ? "rounded-br-none bg-blue-500 text-white"
+                    : "rounded-bl-none bg-gray-200 text-gray-800"
                 } rounded-xl`}
               >
-                {msg.text}
+                {msg.isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-gray-500"></div>
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-gray-500" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-gray-500" style={{ animationDelay: "0.4s" }}></div>
+                  </div>
+                ) : msg.sender === "butler" ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        // Override default element styling
+                        p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: ({node, ...props}) => <ul className="mb-2 pl-4 last:mb-0" {...props} />,
+                        ol: ({node, ...props}) => <ol className="mb-2 pl-4 last:mb-0" {...props} />,
+                        li: ({node, ...props}) => <li className="mb-1 last:mb-0" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-base font-semibold mb-2" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-sm font-semibold mb-2" {...props} />,
+                        code: ({node, ...props}) => <code className="bg-gray-100 rounded px-1 py-0.5" {...props} />,
+                      }}
+                    >
+                      {msg.text}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <p>{msg.text}</p>
+                )}
               </Card>
             </div>
           ))}
         </div>
 
-        {/* Central Input Panel */}
-        <Card className="p-8 sticky bottom-0 bg-white shadow-lg">
-          <div className="flex items-end space-x-4">
-            <div className="flex-1">
-              <Textarea
-                ref={textareaRef}
-                value={inputText}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInputText(e.target.value)}
-                placeholder="Ask here or press the microphone to speak..."
-                className="text-xl p-6 rounded-2xl min-h-[68px] max-h-[200px] resize-none overflow-y-auto"
-                style={{ fontSize: "1.25rem" }}
-                rows={1}
-                onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-              />
-            </div>
-            <div className="relative group">
+        {/* Bottom Section - reduced spacing */}
+        <div className="flex-none space-y-4 mt-4 mb-4">
+          {/* Cue Cards - reduced height */}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {cueCards.map((cue, index) => (
               <Button
-                onClick={toggleListening}
-                className={`p-6 text-black ${
-                  animateMic ? 'animate-pulse' : ''
-                } ${
-                  isListening 
-                    ? 'bg-red-500 text-white hover:bg-red-600' 
-                    : isSpeechSupported 
-                      ? 'hover:bg-gray-800 hover:text-white'  
-                      : 'bg-gray-400 cursor-not-allowed'
-                }`}
-                disabled={!isSpeechSupported}
+                key={index}
+                variant="outline"
+                className="h-auto whitespace-normal py-3 px-4 text-left text-sm hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                onClick={() => handleCueCardClick(cue)}
               >
-                {isListening ? (
-                  <StopCircle className="!h-[1.8rem] !w-[1.8rem]" />
-                ) : (
-                  <Mic className="!h-[1.8rem] !w-[1.8rem]" />
-                )}
+                {cue}
               </Button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="absolute inset-0"></span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    {isSpeechSupported 
-                      ? isListening 
-                        ? "Stop" 
-                        : "Tell me what you need help with"
-                      : platformMessage
-                    }
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <div className="relative group">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={handleSend}
-                    className="p-6 text-black hover:bg-gray-800 hover:text-white"
-                    disabled={!inputText.trim()}
-                  >
-                    <Send className="!h-[1.8rem] !w-[1.8rem]" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {inputText.trim() ? <p>Send</p> : <p>Please type a message to send</p>}
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            ))}
           </div>
-        </Card>
+
+          {/* Input Panel - reduced padding */}
+          <Card className="bg-white p-4 shadow-lg">
+            <div className="flex items-center space-x-4">
+              <div className="flex-1">
+                <Textarea
+                  autoFocus={true}
+                  ref={textareaRef}
+                  value={inputText}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setInputText(e.target.value)
+                  }
+                  placeholder="Type here or press the microphone to speak..."
+                  className="block max-h-[80px] min-h-[50px] w-full resize-none overflow-y-auto rounded-2xl border-none 
+                  !bg-white p-3 text-base leading-[1.5rem] focus:ring-transparent focus:outline-none focus:ring-0 focus-visible:ring-0"
+                  rows={1}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                />
+              </div>
+              <div className="group relative">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        onClick={toggleListening}
+                        className={`p-6 shadow-none bg-transparent rounded-full ${animateMic ? "animate-bounce" : ""} ${
+                          isListening
+                            ? "text-red-500 hover:text-red-700"
+                            : isSpeechSupported && !micPermissionDenied
+                              ? "text-gray-700 hover:bg-gray-700 hover:text-white"
+                              : "text-gray-400 cursor-not-allowed opacity-50"
+                        }`}
+                        disabled={!isSpeechSupported || micPermissionDenied}
+                      >
+                        {isListening ? (
+                          <StopCircle className="!h-[1.8rem] !w-[1.8rem]" />
+                        ) : (
+                          <Mic className="!h-[1.8rem] !w-[1.8rem]" />
+                        )}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-black">
+                    <p>
+                      {
+                        !isSpeechSupported || micPermissionDenied
+                          ? "Enable mic permissions to use this feature."
+                          : isListening
+                            ? "Stop"
+                            : "Tell me what you need help with"
+                      }
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="group relative">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        onClick={handleSend}
+                        className={`p-6 rounded-full ${
+                          inputText.trim()
+                            ? "text-gray-700 hover:bg-gray-700 hover:text-white cursor-pointer"
+                            : "cursor-not-allowed opacity-50"
+                        }`}
+                        disabled={!inputText.trim()}
+                      >
+                        <Send className="!h-[1.8rem] !w-[1.8rem]" />
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {inputText.trim() ? (
+                      <p>Send</p>
+                    ) : (
+                      <p>Please type a message to send</p>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </Card>
+        </div>
 
         {/* Voice Feedback */}
         {isListening && (
           <div className="flex justify-center">
-            <div className="animate-pulse flex items-center space-x-2 text-xl text-purple-600">
+            <div className="flex animate-pulse items-center space-x-2 text-xl text-purple-600">
               <span className="relative flex h-4 w-4">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-purple-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex h-4 w-4 rounded-full bg-purple-500"></span>
               </span>
               <span>Listening... (Click stop to end message)</span>
             </div>
           </div>
         )}
-
-        {/* Cue Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {cueCards.map((cue, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="p-6 text-lg text-left h-auto whitespace-normal"
-              onClick={() => handleCueCardClick(cue)}
-            >
-              {cue}
-            </Button>
-          ))}
-        </div>
       </div>
     </TooltipProvider>
   );
