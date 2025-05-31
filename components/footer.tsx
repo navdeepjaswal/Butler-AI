@@ -1,14 +1,51 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import { createClient } from "@/lib/supabase/client";
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
+  const supabase = createClient();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const pathname = usePathname();
+
+  // Don't show footer on dashboard
+  if (pathname?.startsWith('/dashboard')) {
+    return null;
+  }
+
+  useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    // Subscribe to auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <footer className="mt-16 bg-gray-100 px-6 py-8">
       <div className="mx-auto max-w-6xl">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           <div>
             <h3 className="mb-4 text-xl font-semibold text-gray-800">
-              Butler AI
+              Butler
             </h3>
             <p className="text-gray-700">
               Your friendly AI assistant, helping bridge the technology gap for
@@ -68,7 +105,7 @@ export default function Footer() {
 
         <Separator className="my-8" />
         <p className="text-center text-gray-700">
-          © {new Date().getFullYear()} Butler AI. All rights reserved.
+          © {new Date().getFullYear()} Butler. All rights reserved.
         </p>
       </div>
     </footer>

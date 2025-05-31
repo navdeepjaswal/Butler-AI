@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 
@@ -27,17 +27,22 @@ export default function Navbar() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    router.push('/'); 
+    router.push("/");
   };
 
-  const isDashboard = pathname?.startsWith('/dashboard');
+  const isDashboard = pathname?.startsWith("/dashboard");
 
   if (isLoading) {
     return (
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-50/95 backdrop-blur-sm px-6 py-3 shadow-sm">
+      <nav className="fixed left-0 right-0 top-0 z-50 h-[72px] bg-gray-50/95 px-6 py-3 shadow-sm backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Link href="/" className="flex items-center space-x-3">
-            <Image src="/logo/Butler.png" alt="Butler Logo" width={50} height={50} />
+            <Image
+              src="/logo/Butler.png"
+              alt="Butler Logo"
+              width={50}
+              height={50}
+            />
             <span className="text-3xl font-semibold text-gray-800">Butler</span>
           </Link>
           <div className="h-8 w-20 animate-pulse rounded bg-gray-200 md:block"></div>
@@ -47,10 +52,18 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-50/95 backdrop-blur-sm px-6 py-3 shadow-sm">
+    <nav className="fixed left-0 right-0 top-0 z-50 h-[72px] bg-gray-50/95 px-6 py-3 shadow-sm backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between">
-        <Link href={user && isDashboard ? "/dashboard" : "/"} className="flex items-center space-x-3">
-          <Image src="/logo/Butler.png" alt="Butler Logo" width={50} height={50} />
+        <Link
+          href={user && isDashboard ? "/dashboard" : "/"}
+          className="flex items-center space-x-3"
+        >
+          <Image
+            src="/logo/Butler.png"
+            alt="Butler Logo"
+            width={50}
+            height={50}
+          />
           <span className="text-3xl font-semibold text-gray-800">Butler</span>
         </Link>
 
@@ -59,7 +72,7 @@ export default function Navbar() {
             <Button
               onClick={handleSignOut}
               variant="ghost"
-              className="text-gray-800 hover:text-purple-700 hover:bg-transparent flex items-center space-x-2"
+              className="flex items-center space-x-2 text-gray-800 hover:bg-transparent hover:text-purple-700"
             >
               <LogOut className="h-5 w-5" />
               <span>Sign Out</span>
@@ -70,25 +83,25 @@ export default function Navbar() {
             <div className="hidden space-x-8 md:flex">
               <Link
                 href="/"
-                className="text-lg text-gray-800 transition-colors hover:text-gray-600"
+                className={`text-lg text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/" ? "text-purple-600" : ""}`}
               >
                 Home
               </Link>
               <Link
                 href="/about"
-                className="text-lg text-gray-800 transition-colors hover:text-gray-600"
+                className={`text-lg text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/about" ? "text-purple-600" : ""}`}
               >
                 About Us
               </Link>
               <Link
                 href="/how-it-works"
-                className="text-lg text-gray-800 transition-colors hover:text-gray-600"
+                className={`text-lg text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/how-it-works" ? "text-purple-600" : ""}`}
               >
                 How It Works
               </Link>
               <Link
                 href="/faq"
-                className="text-lg text-gray-800 transition-colors hover:text-gray-600"
+                className={`text-lg text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/faq" ? "text-purple-600" : ""}`}
               >
                 FAQ
               </Link>
@@ -106,7 +119,7 @@ export default function Navbar() {
                 asChild
                 variant="default"
                 size="lg"
-                className="text-lg font-medium shadow-none text-gray-800 hover:text-gray-600"
+                className="bg-transparent text-lg font-medium text-gray-800 shadow-none hover:bg-transparent hover:text-gray-600"
               >
                 <Link href="/auth/login">Login</Link>
               </Button>
@@ -123,31 +136,41 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent className="w-[300px] sm:w-[400px]">
               <nav className="mt-10 flex flex-col gap-6">
-                <Link href="/" className="flex items-center space-x-3 px-4 mb-4">
-                  <Image src="/logo/Butler.png" alt="Butler Logo" width={40} height={40} />
-                  <span className="text-2xl font-semibold text-gray-800">Butler</span>
+                <Link
+                  href="/"
+                  className="mb-4 flex items-center space-x-3 px-4"
+                >
+                  <Image
+                    src="/logo/Butler.png"
+                    alt="Butler Logo"
+                    width={40}
+                    height={40}
+                  />
+                  <span className="text-2xl font-semibold text-gray-800">
+                    Butler
+                  </span>
                 </Link>
                 <Link
                   href="/"
-                  className="text-xl text-gray-800 transition-colors hover:text-gray-600"
+                  className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/" ? "text-purple-600" : ""}`}
                 >
                   Home
                 </Link>
                 <Link
                   href="/about"
-                  className="text-xl text-gray-800 transition-colors hover:text-gray-600"
+                  className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/about" ? "text-purple-600" : ""}`}
                 >
                   About Us
                 </Link>
                 <Link
                   href="/how-it-works"
-                  className="text-xl text-gray-800 transition-colors hover:text-gray-600"
+                  className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/how-it-works" ? "text-purple-600" : ""}`}
                 >
                   How It Works
                 </Link>
                 <Link
                   href="/faq"
-                  className="text-xl text-gray-800 transition-colors hover:text-gray-600"
+                  className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/faq" ? "text-purple-600" : ""}`}
                 >
                   FAQ
                 </Link>
@@ -161,7 +184,7 @@ export default function Navbar() {
                   asChild
                   variant="default"
                   size="lg"
-                  className="text-lg font-medium shadow-none text-gray-800 hover:text-gray-600"
+                  className="text-lg font-medium text-gray-800 shadow-none hover:text-gray-600"
                 >
                   <Link href="/auth/login">Login</Link>
                 </Button>

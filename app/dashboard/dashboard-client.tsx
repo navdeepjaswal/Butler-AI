@@ -42,8 +42,8 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
   const [platformMessage, setPlatformMessage] = useState("");
   const [cueCards, setCueCards] = useState([
-    "What's on the news?",
-    "I want to search for an email",
+    "What can you help me with?",
+    "I want you to store passwords for my accounts",
     "How do I video call my daughter?",
   ]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -51,6 +51,7 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
   const [micPermissionChecked, setMicPermissionChecked] = useState(false);
   const [micPermissionDenied, setMicPermissionDenied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDashboardReady, setIsDashboardReady] = useState(false);
 
   // Speech recognition setup
   const recognition = useRef<any>(null);
@@ -88,10 +89,13 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
           "Voice input is not supported in your browser. Please use Chrome or Edge for voice features, or continue with text input.",
         );
         setMicPermissionChecked(true);
-        return;
+      } else {
+        setIsSpeechSupported(true);
+        setMicPermissionChecked(true);
       }
-      setIsSpeechSupported(true);
-      setMicPermissionChecked(true);
+      
+      // Mark dashboard as ready after all checks
+      setIsDashboardReady(true);
     };
 
     checkSpeechSupport();
@@ -276,23 +280,36 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
     setInputText(text);
   };
 
+  if (!isDashboardReady) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-200 border-t-purple-600"></div>
+          <p className="text-lg text-gray-600">Loading your Butler...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider>
-      <div className="mx-auto max-w-4xl h-[100vh] pt-16 px-4 flex flex-col">
-        {/* Welcome Header - reduced margins */}
-        <header className="space-y-1 flex-none mb-4">
-          <h1 className="text-4xl font-bold text-gray-800">
-            {greeting}, {initialName}
-          </h1>
-          <p className="text-2xl text-gray-600">What can I help with today?</p>
-        </header>
+      <div className={`mx-auto max-w-4xl px-4 flex flex-col ${messages.length === 1 ? 'h-auto gap-4' : 'h-[100vh]'}`}>
+        {/* Welcome Header - only show when there's one message */}
+        {messages.length === 1 && (
+          <header className="space-y-1 flex-none mb-4">
+            <h1 className="text-4xl font-bold text-gray-800">
+              {greeting}, {initialName}
+            </h1>
+            <p className="text-2xl text-gray-600">What can I help with today?</p>
+          </header>
+        )}
 
         {/* Chat Messages Display - with ref for auto-scroll */}
         <div 
           ref={chatContainerRef}
-          className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-4
+          className={`flex-1 min-h-0 space-y-3 overflow-y-auto pr-4
           scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
-          hover:scrollbar-thumb-gray-400 transition-colors"
+          hover:scrollbar-thumb-gray-400 transition-colors ${messages.length === 1 ? 'max-h-[200px]' : ''}`}
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#D1D5DB transparent',
