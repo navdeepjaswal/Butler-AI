@@ -100,6 +100,7 @@ export async function POST(req: Request) {
     if (updateError) {
       console.error('Failed to update request count:', updateError);
     }
+    console.log('Requests Made = ' + currentCount);
 
     return NextResponse.json({
       response: completion.choices[0].message.content,

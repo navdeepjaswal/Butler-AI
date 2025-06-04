@@ -73,8 +73,8 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
   const [platformMessage, setPlatformMessage] = useState("");
   const [cueCards, setCueCards] = useState([
-    "What can you help me with?",
-    "I need help breaking down an email I received",
+    "What can I use to remember my passwords?",
+    "How to get and use Whatsapp?",
     "How do I video call my daughter?",
   ]);
   const [messages, setMessages] = useState<Message[]>([]);
