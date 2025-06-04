@@ -32,7 +32,7 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      router.push("/try-butler"); //add internal homepage
+      router.replace("/dashboard"); //add internal homepage
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -42,6 +42,7 @@ export function LoginForm({
 
   const handleGoogleSignIn = async () => {
     const supabase = createClient();
+    console.log(' supabase: '+  supabase);
     setError(null);
     try {
       const { error } = await supabase.auth.signInWithOAuth({

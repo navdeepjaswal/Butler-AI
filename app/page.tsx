@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, MessageSquare, Smartphone, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,23 +16,36 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gray-100 px-6 py-16">
-        <div className="mx-auto max-w-6xl text-center">
-          <h1 className="mb-6 text-4xl font-bold text-gray-800 md:text-5xl">
-            Technology Made Simple for Seniors
-          </h1>
-          <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-700 md:text-2xl">
-            Butler AI is your personal assistant that helps you navigate the
-            digital world with ease. No more confusion, just simple
-            conversations.
-          </p>
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <CTAButton text="Try Butler Now" href="/auth/sign-up" />
-            <Link
-              href="/how-it-works"
-              className="inline-flex items-center px-4 py-2 text-lg font-medium text-gray-800 hover:text-gray-600"
-            >
-              Learn More <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
+        <div className="mx-auto max-w-6xl">
+          <div className="grid items-center gap-12 md:grid-cols-2">
+            <div className="text-left">
+              <h1 className="mb-6 text-4xl font-bold text-gray-800 md:text-5xl">
+                Technology Made Simple for Seniors
+              </h1>
+              <p className="mb-10 text-xl text-gray-700 md:text-2xl">
+                Butler AI is your personal assistant that helps you navigate the
+                digital world with ease. No more confusion, just simple
+                conversations.
+              </p>
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <CTAButton text="Try Butler Now" href="/auth/sign-up" />
+                <Link
+                  href="/how-it-works"
+                  className="inline-flex items-center px-4 py-2 text-lg font-medium text-gray-800 hover:text-gray-600"
+                >
+                  Learn More <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </div>
+            </div>
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-lg">
+              <Image
+                src="/landing/hero.jpg"
+                alt="Senior using smartphone with ease"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
           </div>
         </div>
       </section>

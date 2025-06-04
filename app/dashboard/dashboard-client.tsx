@@ -43,7 +43,7 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
   const [platformMessage, setPlatformMessage] = useState("");
   const [cueCards, setCueCards] = useState([
     "What can you help me with?",
-    "I want you to store passwords for my accounts",
+    "I need help breaking down an email I received",
     "How do I video call my daughter?",
   ]);
   const [messages, setMessages] = useState<Message[]>([]);
