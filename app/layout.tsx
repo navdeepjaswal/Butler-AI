@@ -3,6 +3,8 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
+import { Toaster } from "@/components/ui/toaster";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -43,10 +45,9 @@ export default function RootLayout({
         >
           <Navbar />
           <main className="flex-grow pt-[72px]">{children}</main>
-          <footer className="py-4 px-6 bg-gray-100 text-center text-sm text-gray-600">
-            © {new Date().getFullYear()} Butler. All rights reserved.
-          </footer>
+          <Footer />
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

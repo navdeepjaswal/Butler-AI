@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/tooltip";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 // Web Speech API types
 interface SpeechRecognitionEvent extends Event {
@@ -35,6 +37,35 @@ interface Message {
   isLoading?: boolean;
 }
 
+// Helper function to format conversation for storage
+const formatConversationForStorage = (messages: Message[]) => {
+  return messages
+    .filter(msg => !msg.isLoading)
+    .map(msg => `${msg.sender.toUpperCase()}: ${msg.text}`)
+    .join('\n\n');
+};
+
+// Helper function to generate a summary
+const generateSummary = async (conversation: string) => {
+  try {
+    const res = await fetch("/api/openai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: `Please summarize this conversation in a concise way:\n\n${conversation}`,
+        isSummary: true
+      }),
+    });
+
+    if (!res.ok) throw new Error('Failed to generate summary');
+    const data = await res.json();
+    return data.response;
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    return 'Conversation with Butler';
+  }
+};
+
 export function DashboardClient({ initialName }: DashboardClientProps) {
   const [isListening, setIsListening] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -52,6 +83,10 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
   const [micPermissionDenied, setMicPermissionDenied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDashboardReady, setIsDashboardReady] = useState(false);
+  const [isSavingConversation, setIsSavingConversation] = useState(false);
+  const supabase = createClient();
+  const { toast } = useToast();
+  const [remainingRequests, setRemainingRequests] = useState<number | null>(null);
 
   // Speech recognition setup
   const recognition = useRef<any>(null);
@@ -208,6 +243,83 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
     }
   };
 
+  // Function to save conversation
+  const saveConversation = async () => {
+    if (messages.length <= 1 || isSavingConversation) return; // Skip if only welcome message or already saving
+    
+    setIsSavingConversation(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const fullConversation = formatConversationForStorage(messages);
+        const summary = await generateSummary(fullConversation);
+        
+        // console.log('Saving conversation:', {
+        //   user_id: user.id,
+        //   summary,
+        //   full_conversation: fullConversation
+        // });
+        
+        const { error } = await supabase
+          .from('conversations')
+          .insert([
+            {
+              user_id: user.id,
+              summary: summary,
+              full_conversation: fullConversation,
+              created_at: new Date().toISOString(),
+            },
+          ]);
+
+        if (error) {
+          console.error('Error saving conversation:', error);
+          throw error;
+        } else {
+          // console.log('Conversation saved successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving conversation:', error);
+    } finally {
+      setIsSavingConversation(false);
+    }
+  };
+
+  // Monitor session changes and save conversation when session ends
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || (!session && messages.length > 1)) {
+        // console.log('Session ended, saving conversation...');
+        await saveConversation();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [messages]);
+
+  // Save conversation periodically (every 5 minutes) as backup
+  useEffect(() => {
+    const saveInterval = setInterval(() => {
+      if (messages.length > 1) {
+        saveConversation();
+      }
+    }, 300000); // 5 minutes
+
+    return () => clearInterval(saveInterval);
+  }, [messages]);
+
+  // Save conversation on component unmount
+  useEffect(() => {
+    return () => {
+      if (messages.length > 1) {
+        saveConversation();
+      }
+    };
+  }, [messages]);
+
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
 
@@ -245,31 +357,58 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
           error: data.error,
           details: data.details
         });
+
+        if (data.isLimitReached) {
+          toast({
+            variant: "destructive",
+            title: "Request Limit Reached",
+            description: "You have reached the maximum limit of 10 requests. Thank you for using Butler!",
+          });
+        }
+
         throw new Error(data.error || 'Failed to get response');
       }
 
-      // Remove loading message and add actual response
+      // Update remaining requests
+      if (typeof data.remainingRequests === 'number') {
+        setRemainingRequests(data.remainingRequests);
+        
+        // Show warning when getting low on requests
+        if (data.remainingRequests <= 2) {
+          toast({
+            title: "Running Low on Requests",
+            description: `You have ${data.remainingRequests} request${data.remainingRequests === 1 ? '' : 's'} remaining.`,
+          });
+        }
+      }
+
+      // Remove loading message and add Butler's response
       setMessages((prevMessages) => {
-        const filteredMessages = prevMessages.filter(msg => !msg.isLoading);
-        return [...filteredMessages, {
-          id: Date.now().toString() + "-butler",
-          text: data.response,
-          sender: "butler",
-        }];
+        const messages = prevMessages.filter((msg) => !msg.isLoading);
+        return [
+          ...messages,
+          {
+            id: Date.now().toString(),
+            text: data.response,
+            sender: "butler",
+          },
+        ];
       });
 
-      // Generate follow-up questions for cue cards
+      // Generate follow-up questions
       await generateFollowUpQuestions(inputText, data.response);
-
-    } catch (error: any) {
-      console.error('Client-side error:', error);
+    } catch (error) {
+      console.error('Error:', error);
       setMessages((prevMessages) => {
-        const filteredMessages = prevMessages.filter(msg => !msg.isLoading);
-        return [...filteredMessages, {
-          id: Date.now().toString() + "-error",
-          text: error.message || "I apologize, but I'm having trouble responding right now. Please try again.",
-          sender: "butler",
-        }];
+        const messages = prevMessages.filter((msg) => !msg.isLoading);
+        return [
+          ...messages,
+          {
+            id: Date.now().toString(),
+            text: "I apologize, but I encountered an error. Please try again.",
+            sender: "butler",
+          },
+        ];
       });
     } finally {
       setIsLoading(false);

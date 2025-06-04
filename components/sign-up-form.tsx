@@ -27,6 +27,13 @@ export function SignUpForm({
     setIsLoading(true);
     setError(null);
 
+    // Validate password
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== repeatPassword) {
       setError("Passwords do not match");
       setIsLoading(false);
@@ -34,17 +41,62 @@ export function SignUpForm({
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // 1. Sign up the user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/login`,
+          data: {
+            email_confirmed: false,
+          }
         },
       });
-      if (error) throw error;
+
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      if (!authData.user) {
+        throw new Error("No user data returned");
+      }
+
+      // 2. Create user profile (if you have a profiles table)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: authData.user.id,
+            email: email,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+        ])
+        .single();
+
+      if (profileError) {
+        // Log the error but don't throw - user is still created
+        console.error("Error creating profile:", profileError);
+      }
+
+      // 3. Redirect to success page
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      // Handle specific Supabase errors
+      if (error instanceof Error) {
+        if (error.message.includes("unique constraint")) {
+          setError("An account with this email already exists");
+        } else if (error.message.includes("weak password")) {
+          setError("Password is too weak. Please choose a stronger password");
+        } else if (error.message.includes("invalid email")) {
+          setError("Please enter a valid email address");
+        } else {
+          setError(error.message);
+        }
+      } else {
+        setError("An unexpected error occurred");
+      }
+      console.error("Signup error:", error);
     } finally {
       setIsLoading(false);
     }

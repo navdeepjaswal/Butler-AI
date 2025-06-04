@@ -42,7 +42,7 @@ export function LoginForm({
 
   const handleGoogleSignIn = async () => {
     const supabase = createClient();
-    console.log(' supabase: '+  supabase);
+    // console.log(' supabase: '+  supabase);
     setError(null);
     try {
       const { error } = await supabase.auth.signInWithOAuth({

@@ -43,9 +43,15 @@ export default function Navbar() {
   }, [user, isLoading, pathname, router]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    router.push("/");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Force a page reload to clear any client-side state
+      window.location.href = '/';
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   if (isLoading) {

@@ -1,10 +1,8 @@
 import { OpenAI } from 'openai';
 import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const MAX_REQUESTS = 10;
 
 export async function POST(req: Request) {
   try {
@@ -17,7 +15,42 @@ export async function POST(req: Request) {
       );
     }
 
-    const { message, isFollowUp } = await req.json();
+    const supabase = await createClient();
+
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Check user's request count
+    const { data: requestData, error: countError } = await supabase
+      .from('user_requests')
+      .select('request_count')
+      .eq('user_id', user.id)
+      .single();
+
+    if (countError && countError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+      return NextResponse.json(
+        { error: 'Failed to check request limit' },
+        { status: 500 }
+      );
+    }
+
+    const currentCount = requestData?.request_count || 0;
+
+    if (currentCount >= MAX_REQUESTS) {
+      return NextResponse.json(
+        { error: 'Maximum request limit reached', isLimitReached: true },
+        { status: 429 }
+      );
+    }
+
+    // Process the request
+    const { message, isFollowUp, isSummary } = await req.json();
 
     if (!message) {
       return NextResponse.json(
@@ -26,22 +59,51 @@ export async function POST(req: Request) {
       );
     }
 
-    const systemPrompt = isFollowUp 
-      ? "You are a helpful assistant generating follow-up questions. Keep them natural, contextual, and specific to the conversation. Return only the questions, separated by |||."
-      : "You are Butler, a friendly and patient tech assistant for seniors. Explain things simply, avoid jargon, and give clear step-by-step instructions. Focus on being helpful and reassuring.";
+    let systemPrompt = "";
+    let userMessage = message;
 
-    const response = await openai.chat.completions.create({
+    if (isSummary) {
+      systemPrompt = "You are a helpful assistant that creates concise, informative summaries of conversations. Focus on the main topics discussed and key outcomes. Keep summaries under 100 characters.";
+    } else if (isFollowUp) {
+      systemPrompt = "You are a helpful assistant generating follow-up questions. Generate natural, contextually relevant questions that would help continue the conversation.";
+    } else {
+      systemPrompt = "You are Butler, a friendly and patient AI assistant designed to help seniors with technology. Your responses should be clear, concise, and easy to understand. Avoid technical jargon unless necessary, and when used, explain it in simple terms. Always maintain a warm, respectful tone.";
+    }
+
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: message }
+        { role: "user", content: userMessage }
       ],
-      temperature: isFollowUp ? 0.7 : 0.5,
-      max_tokens: isFollowUp ? 150 : 500,
+      temperature: isSummary ? 0.3 : 0.7,
+      max_tokens: isSummary ? 100 : 500,
     });
 
+    // Update request count
+    const { error: updateError } = await supabase
+      .from('user_requests')
+      .upsert(
+        { 
+          user_id: user.id,
+          request_count: currentCount + 1,
+          last_request: new Date().toISOString()
+        },
+        { onConflict: 'user_id' }
+      );
+
+    if (updateError) {
+      console.error('Failed to update request count:', updateError);
+    }
+
     return NextResponse.json({
-      response: response.choices[0].message.content
+      response: completion.choices[0].message.content,
+      remainingRequests: MAX_REQUESTS - (currentCount + 1)
     });
 
   } catch (error: any) {

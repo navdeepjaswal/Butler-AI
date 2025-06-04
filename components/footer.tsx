@@ -2,20 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
-import { usePathname } from 'next/navigation';
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
   const supabase = createClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
-
-  // Don't show footer on dashboard
-  if (pathname?.startsWith('/dashboard')) {
-    return null;
-  }
 
   useEffect(() => {
     // Check initial session
@@ -26,87 +21,123 @@ export default function Footer() {
     // Subscribe to auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      setIsAuthenticated(!!session);
-    });
+    } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        setIsAuthenticated(!!session);
+      },
+    );
 
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
+  // Show minimal footer on dashboard
+  if (pathname?.startsWith("/dashboard")) {
+    return (
+      <footer className="bg-gray-50 px-6 py-4 text-center text-sm text-gray-600">
+        © {new Date().getFullYear()} Butler. All rights reserved.
+      </footer>
+    );
+  }
+
+  // Show no footer when authenticated but not on dashboard
   if (isAuthenticated) {
     return null;
   }
 
+  // Show full footer for non-authenticated pages
   return (
-    <footer className="mt-16 bg-gray-100 px-6 py-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div>
-            <h3 className="mb-4 text-xl font-semibold text-gray-800">
-              Butler
-            </h3>
-            <p className="text-gray-700">
-              Your friendly AI assistant, helping bridge the technology gap for
-              seniors.
+    <footer className="border-t bg-white">
+      <div className="mx-auto max-w-6xl px-6 py-12 md:justify-self-center md:text-center">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+          <div className="space-y-4">
+            <Link href="/" className="flex items-center space-x-2">
+              <Image
+                src="/logo/Butler.png"
+                alt="Butler Logo"
+                width={40}
+                height={40}
+              />
+              <span className="text-xl font-semibold text-gray-800">
+                Butler
+              </span>
+            </Link>
+            <p className="text-sm text-gray-600">
+              Your personal AI assistant for all things tech.
             </p>
           </div>
 
           <div>
-            <h3 className="mb-4 text-xl font-semibold text-gray-800">
-              Quick Links
+            <h3 className="mb-4 text-sm font-semibold text-gray-800">
+              Company
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3 text-sm text-gray-600">
               <li>
-                <Link
-                  href="/"
-                  className="text-gray-700 transition-colors hover:text-gray-600"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-gray-700 transition-colors hover:text-gray-600"
-                >
+                <Link href="/about" className="hover:text-gray-800">
                   About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/how-it-works"
-                  className="text-gray-700 transition-colors hover:text-gray-600"
-                >
-                  How It Works
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/faq"
-                  className="text-gray-700 transition-colors hover:text-gray-600"
-                >
-                  FAQ
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-4 text-xl font-semibold text-gray-800">
-              Contact
+            <h3 className="mb-4 text-sm font-semibold text-gray-800">
+              Support
             </h3>
-            <p className="mb-2 text-gray-700">Need help? We're here for you.</p>
-            <p className="text-gray-700">Email: help@butlerai.com</p>
-            <p className="text-gray-700">Phone: (555) 123-4567</p>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li>
+                <Link href="/contact" className="hover:text-gray-800">
+                  Help Center
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-sm font-semibold text-gray-800">
+              Connect
+            </h3>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li>
+                <Link href="/contact" className="hover:text-gray-800">
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <Separator className="my-8" />
-        <p className="text-center text-gray-700">
-          © {new Date().getFullYear()} Butler. All rights reserved.
-        </p>
+        <div className="mt-12 border-t pt-8">
+          <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
+            <p className="text-sm text-gray-600">
+              © {new Date().getFullYear()} Butler. All rights reserved.
+            </p>
+            <div className="flex items-center space-x-4">
+              <Link href="#" className="hover:opacity-80">
+                <Image
+                  src="/app-store-badge.png"
+                  alt="Download on the App Store"
+                  width={135}
+                  height={40}
+                  className="h-10 w-auto"
+                />
+              </Link>
+              <Link href="#" className="hover:opacity-80">
+                <Image
+                  src="/google-play-badge.png"
+                  alt="Get it on Google Play"
+                  width={135}
+                  height={40}
+                  className="h-10 w-auto"
+                />
+              </Link>
+            </div>
+          </div>
+          <div className="mt-4 flex md:justify-end text-center justify-center">
+            <p className="text-sm text-gray-500">Mobile apps coming soon!</p>
+          </div>
+        </div>
       </div>
     </footer>
   );
