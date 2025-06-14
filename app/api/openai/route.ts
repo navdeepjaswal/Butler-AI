@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     }
 
     let systemPrompt = "";
-    let userMessage = message;
+    const userMessage = message;
 
     if (isSummary) {
       systemPrompt = "You are a helpful assistant that creates concise, informative summaries of conversations. Focus on the main topics discussed and key outcomes. Keep summaries under 100 characters.";

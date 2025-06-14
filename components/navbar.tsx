@@ -60,7 +60,7 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Link href="/" className="flex items-center space-x-3">
             <Image
-              src="/logo/Butler.png"
+              src="/logo/Butler.PNG"
               alt="Butler Logo"
               width={50}
               height={50}
@@ -80,7 +80,7 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Link href="/dashboard" className="flex items-center space-x-3">
             <Image
-              src="/logo/Butler.png"
+              src="/logo/Butler.PNG"
               alt="Butler Logo"
               width={50}
               height={50}
@@ -108,7 +108,7 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-6xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-3">
           <Image
-            src="/logo/Butler.png"
+            src="/logo/Butler.PNG"
             alt="Butler Logo"
             width={50}
             height={50}
@@ -190,7 +190,7 @@ export default function Navbar() {
                 className="mb-4 flex items-center space-x-3 px-4"
               >
                 <Image
-                  src="/logo/Butler.png"
+                  src="/logo/Butler.PNG"
                   alt="Butler Logo"
                   width={40}
                   height={40}
