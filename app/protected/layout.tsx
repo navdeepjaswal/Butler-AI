@@ -1,6 +1,3 @@
-// app/protected/layout.tsx
-"use client"; // this file needs to run in the browser
-
 import "./globals.css";
 import type { Metadata } from "next";
 
