@@ -75,9 +75,3 @@ Many seniors find today’s technology overwhelming. Butler AI bridges the gap w
 ## 🙌 Contributing
 
 We welcome contributions that improve accessibility and simplicity. If you have suggestions or want to help refine the UI for elderly users, please open an issue or PR!
-
----
-
-## 📄 License
-
-MIT © [Your Name]
