@@ -34,9 +34,9 @@ export default function About() {
                 from its benefits.
               </p>
               <p className="mb-6 text-lg text-gray-700">
-                Our founder witnessed firsthand how his grandmother struggled to
-                use her new smartphone to video call her grandchildren. Despite
-                her eagerness to connect, the technology barrier seemed
+                We witnessed firsthand how seniors around us struggle to
+                use technology - video calling thier loved ones, for instance. Despite
+                eagerness to connect, the technology barrier seemed
                 insurmountable.
               </p>
               <p className="mb-6 text-lg text-gray-700">
@@ -45,8 +45,8 @@ export default function About() {
                 simple terms, with endless patience and no judgment.
               </p>
               <p className="text-lg text-gray-700">
-                Today, Butler AI helps thousands of seniors confidently navigate
-                the digital world, connecting them with loved ones and opening
+                Today, Butler AI aims to help seniors confidently navigate
+                the digital world, connecting them with their loved ones effortlessly and opening
                 up new possibilities.
               </p>
             </CardContent>
@@ -107,77 +107,6 @@ export default function About() {
                 <p className="text-lg text-gray-700">
                   We believe technology should bring people together, not create
                   barriers. Butler helps maintain meaningful connections.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section className="px-6 py-16">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-800">
-            Our Team
-          </h2>
-
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <Card className="text-center">
-              <CardContent className="p-8">
-                <Avatar className="mx-auto mb-6 h-32 w-32">
-                  <AvatarImage
-                    src="/placeholder.svg?height=128&width=128"
-                    alt="CEO"
-                  />
-                  <AvatarFallback>JS</AvatarFallback>
-                </Avatar>
-                <h3 className="mb-1 text-xl font-semibold text-gray-800">
-                  John Smith
-                </h3>
-                <p className="mb-4 text-gray-600">Founder & CEO</p>
-                <p className="text-gray-700">
-                  Passionate about making technology accessible to everyone,
-                  regardless of age.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardContent className="p-8">
-                <Avatar className="mx-auto mb-6 h-32 w-32">
-                  <AvatarImage
-                    src="/placeholder.svg?height=128&width=128"
-                    alt="CTO"
-                  />
-                  <AvatarFallback>SJ</AvatarFallback>
-                </Avatar>
-                <h3 className="mb-1 text-xl font-semibold text-gray-800">
-                  Sarah Johnson
-                </h3>
-                <p className="mb-4 text-gray-600">Chief Technology Officer</p>
-                <p className="text-gray-700">
-                  Expert in AI and natural language processing with a focus on
-                  accessibility.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardContent className="p-8">
-                <Avatar className="mx-auto mb-6 h-32 w-32">
-                  <AvatarImage
-                    src="/placeholder.svg?height=128&width=128"
-                    alt="Head of Design"
-                  />
-                  <AvatarFallback>MC</AvatarFallback>
-                </Avatar>
-                <h3 className="mb-1 text-xl font-semibold text-gray-800">
-                  Michael Chen
-                </h3>
-                <p className="mb-4 text-gray-600">Head of Design</p>
-                <p className="text-gray-700">
-                  Specializes in creating simple, intuitive interfaces for users
-                  of all ages.
                 </p>
               </CardContent>
             </Card>
