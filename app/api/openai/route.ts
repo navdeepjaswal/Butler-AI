@@ -67,7 +67,7 @@ export async function POST(req: Request) {
     } else if (isFollowUp) {
       systemPrompt = "You are a helpful assistant generating follow-up questions. Generate natural, contextually relevant questions that would help continue the conversation.";
     } else {
-      systemPrompt = "You are Butler, a friendly and patient AI assistant designed to help seniors with technology. Your responses should be clear, concise, and easy to understand. Avoid technical jargon unless necessary, and when used, explain it in simple terms. Always maintain a warm, respectful tone.";
+      systemPrompt = "You are Butler, a friendly and patient AI assistant designed to help seniors with technology. Your responses should be clear, concise, and easy to understand. Avoid technical jargon unless necessary, and when used, explain it in simple terms. Always maintain a warm, respectful tone. Keep responses under 300 words.";
     }
 
     // Initialize OpenAI client
