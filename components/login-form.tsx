@@ -40,17 +40,37 @@ export function LoginForm({
     }
   };
 
+  // const handleGoogleSignIn = async () => {
+  //   const supabase = createClient();
+  //   // console.log(' supabase: '+  supabase);
+  //   setError(null);
+  //   try {
+  //     const { error } = await supabase.auth.signInWithOAuth({
+  //       provider: "google",
+  //       options: {
+  //         redirectTo: `${window.location.origin}/auth/callback`,
+  //       },
+  //     });
+  //     if (error) throw error;
+  //   } catch (error: unknown) {
+  //     setError(error instanceof Error ? error.message : "An error occurred");
+  //   }
+  // };
+
   const handleGoogleSignIn = async () => {
     const supabase = createClient();
-    // console.log(' supabase: '+  supabase);
     setError(null);
     try {
+      const redirectTo =
+        process.env.NEXT_PUBLIC_SITE_URL + "/auth/callback";
+  
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo,
         },
       });
+  
       if (error) throw error;
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
