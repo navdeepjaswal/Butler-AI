@@ -56,7 +56,7 @@ export default function Navbar() {
 
   if (isLoading) {
     return (
-      <nav className="fixed left-0 right-0 top-0 z-50 h-[72px] bg-gray-50/95 px-6 py-3 shadow-sm backdrop-blur-sm">
+      <nav className="fixed w-full z-50 h-[72px] bg-gray-50/95 px-6 py-3 shadow-sm backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Link href="/" className="flex items-center space-x-3">
             <Image
@@ -76,7 +76,7 @@ export default function Navbar() {
   // Show simplified navbar for authenticated users
   if (user) {
     return (
-      <nav className="fixed left-0 right-0 top-0 z-50 h-[72px] bg-gray-50/95 px-6 py-3 shadow-sm backdrop-blur-sm">
+      <nav className="fixed w-full z-50 h-[72px] bg-gray-50/95 px-6 py-3 shadow-sm backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Link href="/dashboard" className="flex items-center space-x-3">
             <Image

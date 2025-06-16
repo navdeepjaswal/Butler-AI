@@ -15,14 +15,14 @@ export default function DashboardShell({ initialName }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <main className="flex h-screen bg-gray-50">
+    <main className="h-full flex bg-gray-50">
       {/* Sidebar */}
       <div
         className={`
           flex flex-col
           bg-white border-r border-gray-200
           transition-[width] duration-200 ease-in-out
-          ${sidebarOpen ? "w-80" : "w-12"}
+          ${sidebarOpen ? "w-full sm:w-80" : "w-12"}
         `}
       >
         {/* Toggle Button */}
@@ -50,7 +50,7 @@ export default function DashboardShell({ initialName }: DashboardShellProps) {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 md:p-8">
+      <div className={`h-full flex-1 md:p-8 ${sidebarOpen ? "hidden sm:block pointer-events-none opacity-30 md:pointer-events-auto md:opacity-100" : ""}`}>
         <DashboardClient initialName={initialName} />
       </div>
     </main>
