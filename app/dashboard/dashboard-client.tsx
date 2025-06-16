@@ -338,6 +338,12 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
 
+    // If currently listening, stop the microphone
+    if (isListening) {
+      recognition.current.stop();
+      setIsListening(false);
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       text: inputText,
@@ -586,7 +592,7 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
                       setInputText(e.target.value)
                     }
                     placeholder="Type here or press the microphone to speak..."
-                    className="block max-h-[80px] min-h-[50px] w-full resize-none overflow-y-auto rounded-2xl border-none !bg-white p-3 text-base leading-[1.5rem] focus:outline-none focus:ring-0 focus:ring-transparent focus-visible:ring-0"
+                    className="block max-h-[80px] min-h-[50px] w-full resize-none overflow-y-auto rounded-2xl border-none !bg-white p-3 text-base leading-4 focus:outline-none focus:ring-0 focus:ring-transparent focus-visible:ring-0"
                     rows={1}
                     onKeyDown={(
                       e: React.KeyboardEvent<HTMLTextAreaElement>,

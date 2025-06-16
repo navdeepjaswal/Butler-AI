@@ -14,6 +14,7 @@ export default function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
      // 1) Immediately load any existing session on mount:
@@ -116,7 +117,7 @@ export default function Navbar() {
           <span className="text-3xl font-semibold text-gray-800">Butler</span>
         </Link>
 
-        <div className="hidden space-x-8 md:flex">
+        <div className="hidden space-x-8 lg:flex">
           <Link
             href="/"
             className={`text-lg text-gray-800 transition-colors hover:text-gray-600 ${
@@ -158,7 +159,7 @@ export default function Navbar() {
             Contact
           </Link>
         </div>
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <Button
             asChild
             variant="default"
@@ -177,10 +178,10 @@ export default function Navbar() {
           </Button>
         </div>
 
-        <Sheet>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" aria-label="Menu">
-              <Menu className="h-6 w-6" />
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetTrigger asChild className="lg:hidden">
+            <Button size="icon" aria-label="Menu">
+              <Menu className="h-6 w-6 text-black" />
             </Button>
           </SheetTrigger>
           <SheetContent className="w-[300px] sm:w-[400px]">
@@ -188,6 +189,7 @@ export default function Navbar() {
               <Link
                 href="/"
                 className="mb-4 flex items-center space-x-3 px-4"
+                onClick={() => setIsSheetOpen(false)}
               >
                 <Image
                   src="/logo/Butler.PNG"
@@ -201,47 +203,43 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/"
-                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${
-                  pathname === "/" ? "text-purple-600" : ""
-                }`}
+                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/" ? "text-purple-600" : ""}`}
+                onClick={() => setIsSheetOpen(false)}
               >
                 Home
               </Link>
               <Link
                 href="/about"
-                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${
-                  pathname === "/about" ? "text-purple-600" : ""
-                }`}
+                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/about" ? "text-purple-600" : ""}`}
+                onClick={() => setIsSheetOpen(false)}
               >
                 About Us
               </Link>
               <Link
                 href="/how-it-works"
-                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${
-                  pathname === "/how-it-works" ? "text-purple-600" : ""
-                }`}
+                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/how-it-works" ? "text-purple-600" : ""}`}
+                onClick={() => setIsSheetOpen(false)}
               >
                 How It Works
               </Link>
               <Link
                 href="/faq"
-                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${
-                  pathname === "/faq" ? "text-purple-600" : ""
-                }`}
+                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/faq" ? "text-purple-600" : ""}`}
+                onClick={() => setIsSheetOpen(false)}
               >
                 FAQ
               </Link>
               <Link
                 href="/contact"
-                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${
-                  pathname === "/contact" ? "text-purple-600" : ""
-                }`}
+                className={`text-xl text-gray-800 transition-colors hover:text-gray-600 ${pathname === "/contact" ? "text-purple-600" : ""}`}
+                onClick={() => setIsSheetOpen(false)}
               >
                 Contact
               </Link>
               <Button
                 asChild
                 className="w-full bg-purple-600 text-lg hover:bg-purple-700"
+                onClick={() => setIsSheetOpen(false)}
               >
                 <Link href="/auth/sign-up">Try Butler</Link>
               </Button>
@@ -250,6 +248,7 @@ export default function Navbar() {
                 variant="default"
                 size="lg"
                 className="text-lg font-medium text-gray-800 shadow-none hover:text-gray-600"
+                onClick={() => setIsSheetOpen(false)}
               >
                 <Link href="/auth/login">Login</Link>
               </Button>

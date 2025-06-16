@@ -42,7 +42,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
-          <main className="h-full pt-[72px]">{children}</main>
+          <main className="flex-grow pt-[72px]">{children}</main>
           <Footer />
         </ThemeProvider>
         <Toaster />
