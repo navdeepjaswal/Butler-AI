@@ -188,7 +188,7 @@ export function SignUpForm({
               <Button
                 type="button"
                 variant="outline"
-                className="h-11 bg-white"
+                className="h-11 bg-white text-black"
                 onClick={handleGoogleSignIn}
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">

@@ -40,7 +40,7 @@ export default function DashboardLayout({
 
   return (
     <>
-      <main>{children}</main>
+      <main className="h-full">{children}</main>
     </>
   );
 } 
