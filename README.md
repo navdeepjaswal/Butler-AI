@@ -16,6 +16,7 @@ Many seniors find today’s technology overwhelming. Butler AI bridges the gap w
 
 - 🗣️ **Voice Input Support** – Just press a button to speak your request.
 - 💬 **AI-Powered Conversations** – Built with OpenAI’s GPT to deliver smart, helpful answers.
+- 🃏 Cue Cards for Easy Prompts – A set of large, easy-to-read prompt cards that let seniors pick their next question without typing.
 - 🧼 **Minimalist UI** – Clean, readable fonts and layouts with no clutter or confusion.
 - 📱 **Responsive Design** – Optimized for tablets and mobile use by elderly users.
 - 🔐 **Secure Backend** – Uses Supabase for safe user data handling and simple auth.
