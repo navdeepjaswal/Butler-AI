@@ -180,8 +180,8 @@ export default function Navbar() {
 
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild className="lg:hidden">
-            <Button size="icon" aria-label="Menu">
-              <Menu className="h-6 w-6 text-black" />
+            <Button size="icon" aria-label="Menu" variant="default" className="bg-white">
+              <Menu className="h-6 w-6 text-black"/>
             </Button>
           </SheetTrigger>
           <SheetContent className="w-[300px] sm:w-[400px]">
@@ -238,7 +238,7 @@ export default function Navbar() {
               </Link>
               <Button
                 asChild
-                className="w-full bg-purple-600 text-lg hover:bg-purple-700"
+                className="w-full bg-purple-600 text-white text-lg hover:bg-purple-700"
                 onClick={() => setIsSheetOpen(false)}
               >
                 <Link href="/auth/sign-up">Try Butler</Link>
@@ -247,7 +247,7 @@ export default function Navbar() {
                 asChild
                 variant="default"
                 size="lg"
-                className="text-lg font-medium text-gray-800 shadow-none hover:text-gray-600"
+                className="text-lg font-medium text-black bg-white shadow-none hover:text-gray-600"
                 onClick={() => setIsSheetOpen(false)}
               >
                 <Link href="/auth/login">Login</Link>
