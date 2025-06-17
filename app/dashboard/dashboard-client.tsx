@@ -611,7 +611,7 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
                         <span>
                           <Button
                             onClick={toggleListening}
-                            className={`rounded-full bg-transparent p-6 shadow-none ${animateMic ? "animate-bounce" : ""} ${
+                            className={`text-bg-gray-700 rounded-full bg-transparent p-6 shadow-none ${animateMic ? "animate-bounce" : ""} ${
                               isListening
                                 ? "text-red-500 hover:text-red-700"
                                 : isSpeechSupported && !micPermissionDenied
@@ -647,7 +647,7 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
                             onClick={handleSend}
                             className={`rounded-full p-6 ${
                               inputText.trim()
-                                ? "cursor-pointer text-gray-700 hover:bg-gray-700 hover:text-white"
+                                ? "cursor-pointer text-gray-700 bg-gray-50 hover:bg-gray-700 hover:text-white"
                                 : "cursor-not-allowed opacity-50"
                             }`}
                             disabled={!inputText.trim()}
