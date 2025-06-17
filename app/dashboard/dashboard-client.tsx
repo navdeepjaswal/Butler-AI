@@ -571,7 +571,7 @@ export function DashboardClient({ initialName }: DashboardClientProps) {
               <Button
                 key={index}
                 variant="outline"
-                className="h-auto whitespace-normal px-4 py-3 text-left text-sm transition-colors hover:bg-gray-50 hover:text-gray-900"
+                className="h-auto text-white bg-black whitespace-normal px-4 py-3 text-left text-sm transition-colors hover:bg-gray-50 hover:text-gray-900"
                 onClick={() => handleCueCardClick(cue)}
               >
                 {cue}
