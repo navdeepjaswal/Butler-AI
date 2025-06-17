@@ -35,7 +35,8 @@ Many seniors find today’s technology overwhelming. Butler AI bridges the gap w
 
 ## 📸 Screenshots
 
-> *(Include a few images or GIFs here showing the UI and how easy it is to use)*
+![image](https://github.com/user-attachments/assets/a09118b5-022c-4382-b4c7-9a650cb62dde)
+![image](https://github.com/user-attachments/assets/d042c031-f33b-45b6-a370-512320ee9d6e)
 
 ---
 
@@ -54,21 +55,6 @@ Many seniors find today’s technology overwhelming. Butler AI bridges the gap w
 - 🧾 History and memory of past questions
 - 🌐 Multi-language support
 - 📱 Native app version (React Native)
-
----
-
-## 🚀 Getting Started (Dev)
-
-1. Clone the repo  
-   `git clone https://github.com/yourusername/butler-ai.git`
-
-2. Install dependencies  
-   `npm install`
-
-3. Set up `.env.local` with your Supabase and OpenAI credentials.
-
-4. Run locally  
-   `npm run dev`
 
 ---
 
